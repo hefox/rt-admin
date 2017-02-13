@@ -4,7 +4,6 @@ var mongoose = require('mongoose');
 var multer  =   require('multer');
 var path = require('path');
 var Gallery = mongoose.model('Gallery');
-var Image = mongoose.model('Image');
 var mkdirp = require('mkdirp');
 
 
@@ -18,9 +17,13 @@ router.get('/images', function (req, res, next) {
     res.redirect('/login');
   }
   else {
-    res.render('imagesform',  {
-      user : req.user,
-      info: req.flash('info')
+    Gallery.find({title: { $ne: null }}).select('title stub').exec(function (err, galleries) {
+      res.render('imagesform',  {
+        user : req.user,
+        info: req.flash('info'),
+        error: req.flash('error'),
+        galleries: galleries
+      });
     });
   }
 });
@@ -28,14 +31,25 @@ router.get('/images', function (req, res, next) {
 // Create a stub via replacing everything non alphanumeric
 var createStub = function(name) {
   name = name.toLowerCase();
-  return name.replace(' ', '-').replace(/\W/g, '');
+  name = name.replace(' ', '-');
+  return name.replace(/\W/g, '');
 }
 
 // Create a custom storage handler.
 var storage = multer.diskStorage({
   destination: function (req, file, callback) {
-    var dir = './public/uploads/' + createStub(req.body.galleryname) + '/';
-    mkdirp(dir, err => callback(err, dir))
+    if (req.body.galleryname) {
+      var dir = './public/uploads/' + createStub(req.body.galleryname) + '/';
+      mkdirp(dir, err => callback(err, dir));
+    }
+    else if (req.body.galleryid) {
+      Gallery.findById(req.body.galleryid, function (err, gallery) {
+        if (err) return handleError(err);
+        var dir = './public/uploads/' + gallery.stub + '/';
+        callback(null, dir);
+      });
+    }
+    // @todo Error out.
   },
   filename: function (req, file, callback) {
     callback(null, file.originalname)
@@ -48,31 +62,47 @@ router.post('/images', multer({ storage : storage }).array('galleryPhotos'), fun
     res.redirect('/login');
     return;
   }
-	if (req.body.galleryname && req.files) {
+	if ((req.body.galleryname || req.body.galleryid) && req.files) {
   	var images = [];
   	for (var key in req.files) {
     	if (req.files[key].mimetype.indexOf('image/') === 0) {
-      	images.push(new Image({src: req.files[key].path}));
+      	images.push({src: req.files[key].path});
     	}
   	}
-  	var gallery = new Gallery({
-    	name: req.body.galleryname,
-    	stub: createStub(req.body.galleryname),
-    	external: false,
-    	images: images,
-  	});
-    gallery.save(function (err) {
-      if (err) {
-        req.flash('error', 'Gallery Creation Failed');
-        return handleError(err);
-      }
-      else {
-        req.flash('info', 'Gallery Creation Successful');
-        res.redirect('/galleries');
-      }
-    });
+  	var create = req.body.galleryname ? true : false;
+  	var save = function(gallery) {
+      gallery.save(function (err) {
+        if (err) {
+          req.flash('error', create ? 'Gallery Creation Failed' : 'Gallery Update Failed');
+          return handleError(err);
+        }
+        else {
+          req.flash('info', create ? 'Gallery Creation Successful' : 'Gallery Update Successful');
+          res.redirect('/galleries');
+        }
+      });
+  	}
+  	if (req.body.galleryname) {
+    	var gallery = new Gallery({
+      	title: req.body.galleryname,
+      	stub: createStub(req.body.galleryname),
+      	external: false,
+      	images: images,
+    	});
+    	save(gallery);
+  	}
+  	else {
+      Gallery.findById(req.body.galleryid, function (err, gallery) {
+        for (var i in images) {
+          gallery.images.push(images[i])
+          console.log(images[i]);
+        }
+        save(gallery);
+      });
+  	}
   }
   else {
-    req.flash('error', 'Please provide gallery name and images.');
+    req.flash('error', 'Please provide gallery and images.');
+    res.redirect('/images');
   }
 });

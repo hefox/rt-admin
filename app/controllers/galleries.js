@@ -13,7 +13,9 @@ router.get('/galleries', function (req, res, next) {
     res.render('index', {
       user : req.user,
       title: 'Photo Uploader yay',
-      galleries: galleries
+      galleries: galleries,
+      info: req.flash('info'),
+      error: req.flash('error'),
     });
   });
 });
