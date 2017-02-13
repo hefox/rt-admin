@@ -37,7 +37,6 @@ module.exports = function (app) {
  */
 var redirectIfNotLoggedIn = function (req, res, next) {
   if (!req.user) {
-    console.log('log logged in');
     res.redirect('/login');
   }
   else {
@@ -92,6 +91,7 @@ var storage = multer.diskStorage({
   destination: function (req, file, callback) {
     // If using galleryname, return the new uploads.
     var galleryId = req.params.gallerId ? req.params.gallerId : req.body.galleryid;
+    console.log('got to upload', galleryId);
     if (req.body.galleryname) {
       var dir = './public/uploads/' + createStub(req.body.galleryname) + '/';
       mkdirp(dir, err => callback(err, dir));
@@ -183,6 +183,9 @@ router.get('/galleries/:gallerId', redirectIfNotLoggedIn, function (req, res, ne
   });
 })
 
+/**
+ * Handling gallery editing.
+ */
 router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, function (req, res, err) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err) {
@@ -197,15 +200,19 @@ router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, function (req, re
       date: date.substring(0, date.indexOf('T'))
     });
   });
-})
+});
+
+/**
+ * Handling gallery edit submission.
+ */
 router.post('/galleries/:gallerId/edit', redirectIfNotLoggedIn, multerHandler, function (req, res, next) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err) {
       req.flash('error', 'Gallery not found.');
       return next(err);
     }
-    Gallery.findById(req.body.galleryid, function (err, gallery) {
-      if (err) {
+    Gallery.findById(req.params.gallerId, function (err, gallery) {
+      if (err || !gallery) {
         req.flash('error', 'Unable to find gallery to update.');
         res.redirect('/galleries');
         return;
@@ -219,7 +226,59 @@ router.post('/galleries/:gallerId/edit', redirectIfNotLoggedIn, multerHandler, f
           req.flash('error', 'Image of improver format uploaded ' + req.files[key].mimetype);
       	}
     	}
+    	gallery.title = req.body.galleryTitle;
+    	gallery.date = req.body.galleryDate;
       gallerySave(gallery, req, res, next, false);
+    });
+  });
+});
+
+/**
+ * Handling showing image deletion form.
+ */
+router.get('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+  Gallery.findById(req.params.gallerId, function (err, gallery) {
+    if (err) {
+      req.flash('error', 'Gallery not found.');
+      return next(err);
+    }
+    var image = gallery.images.id(req.params.imageId);
+    if (!image) {
+      req.flash('error', 'Unable to find image');
+      return next(err);
+    }
+    res.render('galleryimagedelete', {
+      title: 'Are you sure you want to delete image of gallery' + (gallery.title ? ' ' + gallery.title : '' ) + '? ',
+      image: image,
+      gallery: gallery,
+      src: imgPath(image.src),
+    });
+  });
+});
+
+
+/**
+ * Handling image deletion.
+ */
+router.post('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+  Gallery.findById(req.params.gallerId, function (err, gallery) {
+    if (err) {
+      req.flash('error', 'Gallery not found.');
+      return next(err);
+    }
+    var image = gallery.images.id(req.params.imageId);
+    if (!image) {
+      req.flash('error', 'Unable to find image');
+      return next(err);
+    }
+    image.remove();
+    gallery.save(function (err) {
+      if (err) {
+        req.flash('error', 'Unable to delete image from gallery.');
+        return next(err);
+      }
+      req.flash('succes', 'Deleted image from gallery.');
+      res.redirect('/galleries/' + req.params.gallerId);
     });
   });
 });

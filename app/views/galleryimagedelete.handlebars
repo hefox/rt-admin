@@ -1,0 +1,11 @@
+<form id="uploadForm"
+    action="/galleries/{{gallery._id}}/image/{{image._id}}/delete"
+    method="post"
+    class="form-horizontal">
+  <img src="{{src}}" style="width: 200px;"/>
+  <div class="form-group">
+    <div class="col-sm-offset-10 col-sm-2">
+      <input type="submit" class="btn btn-primary btn-large"  value="Delete" name="submit">
+    </div>
+  </div>
+</form>
