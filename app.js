@@ -23,16 +23,7 @@ module.exports = require('./config/express')(app, config);
 app.listen(config.port, function () {
   console.log('Express server listening on port ' + config.port);
 });
-
-app.use(require('express-session')({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: false
-}));
-app.use(passport.initialize());
-app.use(passport.session());
 var User = modelsSaved['user'];
 passport.use(new LocalStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
-

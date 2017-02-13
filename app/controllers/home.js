@@ -11,6 +11,7 @@ router.get('/', function (req, res, next) {
   Article.find(function (err, articles) {
     if (err) return next(err);
     res.render('index', {
+      user : req.user,
       title: 'Photo Uploader yay',
       articles: articles
     });
