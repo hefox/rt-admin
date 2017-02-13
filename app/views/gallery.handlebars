@@ -1,0 +1,28 @@
+<p class="lead">{{formatDate gallery.date day="numeric" month="long" year="numeric"}}
+  <a href="/galleries/{{gallery._id}}/edit" class="btn btn-primary">Edit</a></p>
+{{#if images }}
+  <table class="table table-hover">
+    <thead>
+      <tr>
+        <td>Image</td>
+        <td>Util</td>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each images as |image key|}}
+        <tr>
+          <td>
+            <a href="{{image.src}}">
+              <img src={{image.src}} style="width:100px;" />
+            </a>
+          </td>
+          <td>
+            <a href="/gallery/{{gallery._id}}/image/{{image._id}}/delete">Edit</a>
+          </td>
+        </tr>
+      {{/each}}
+    </tbody>
+  </table>
+{{else}}
+  No images yet.
+{{/if}}

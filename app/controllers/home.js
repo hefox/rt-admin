@@ -10,7 +10,7 @@ module.exports = function (app) {
 router.get('/', function (req, res, next) {
   // Redirect to images for now.
   if (req.user) {
-    res.redirect('/images');
+    res.redirect('/galleries/create');
     return;
   }
   Gallery.find(function (err, galleries) {

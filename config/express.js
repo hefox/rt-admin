@@ -11,6 +11,9 @@ var exphbs  = require('express-handlebars');
 var flash = require('connect-flash');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var Handlebars     = require('handlebars');
+var HandlebarsIntl = require('handlebars-intl');
+
 
 
 module.exports = function(app, config) {
@@ -24,6 +27,7 @@ module.exports = function(app, config) {
     partialsDir: [config.root + '/app/views/partials/']
   }));
   app.set('views', config.root + '/app/views');
+  HandlebarsIntl.registerWith(Handlebars);
   app.set('view engine', 'handlebars');
 
   // app.use(favicon(config.root + '/public/img/favicon.ico'));

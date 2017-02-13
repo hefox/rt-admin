@@ -1,0 +1,22 @@
+<form id="uploadForm"
+    action="/galleries/{{gallery._id}}/edit"
+    method="post"
+    class="form-horizontal">
+  <div class="form-group">
+    <label for="gallery-name" class="col-sm-2 control-label">Title</label>
+    <div class="col-sm-10">
+      <input id="gallery-name" type="text" name="galleryTitle" placeholder='Gallery Title' class="form-control" value="{{gallery.title}}"/>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="gallery-date" class="col-sm-2 control-label">Date</label>
+    <div class="col-sm-10">
+      <input id="gallery-date" type="date" class="form-control"  name="galleryDate" value="{{date}}" />
+    </div>
+  </div>
+  <div class="form-group">
+    <div class="col-sm-offset-10 col-sm-2">
+      <input type="submit" class="btn btn-primary btn-large"  value="Update" name="submit">
+    </div>
+  </div>
+</form>
