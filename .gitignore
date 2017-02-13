@@ -1,5 +1,5 @@
 node_modules/
 public/components
-pubic/uploads
+public/uploads
 .nyc_output
 .sass-cache
