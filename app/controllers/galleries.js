@@ -7,12 +7,7 @@ module.exports = function (app) {
   app.use('/', router);
 };
 
-router.get('/', function (req, res, next) {
-  // Redirect to images for now.
-  if (req.user) {
-    res.redirect('/images');
-    return;
-  }
+router.get('/galleries', function (req, res, next) {
   Gallery.find(function (err, galleries) {
     if (err) return next(err);
     res.render('index', {

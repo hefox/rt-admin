@@ -34,6 +34,7 @@ module.exports = function(app, config) {
   }));
   app.use(cookieParser('keyboard cat'));
   app.use(require('express-session')({
+    // @ todo set this in a secret outside of git
       secret: 'keyboard cat',
       resave: false,
       saveUninitialized: false,
