@@ -47,6 +47,15 @@ module.exports = function(app, config) {
   app.use(express.static(config.root + '/public'));
   app.use(methodOverride());
 
+  // Add user and flash to render
+  app.use(function(req, res, next){
+    res.locals.user = req.user;
+    res.locals.info = req.flash('info');
+    res.locals.error = req.flash('error');
+    res.locals.success = req.flash('success');
+    next();
+  });
+
   var controllers = glob.sync(config.root + '/app/controllers/*.js');
   controllers.forEach(function (controller) {
     require(controller)(app);

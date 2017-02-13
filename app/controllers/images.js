@@ -6,7 +6,9 @@ var path = require('path');
 var Gallery = mongoose.model('Gallery');
 var mkdirp = require('mkdirp');
 
-
+var handleError = function(err) {
+  router.redirect('/images');
+}
 
 module.exports = function (app) {
   app.use('/', router);
@@ -19,9 +21,7 @@ router.get('/images', function (req, res, next) {
   else {
     Gallery.find({title: { $ne: null }}).select('title stub').exec(function (err, galleries) {
       res.render('imagesform',  {
-        user : req.user,
-        info: req.flash('info'),
-        error: req.flash('error'),
+        title: 'Upload Gallery',
         galleries: galleries
       });
     });
@@ -62,7 +62,7 @@ router.post('/images', multer({ storage : storage }).array('galleryPhotos'), fun
     res.redirect('/login');
     return;
   }
-	if ((req.body.galleryname || req.body.galleryid) && req.files) {
+	if ((req.body.galleryname || req.body.galleryid) && req.files.length > 0) {
   	var images = [];
   	for (var key in req.files) {
     	if (req.files[key].mimetype.indexOf('image/') === 0) {
@@ -77,7 +77,7 @@ router.post('/images', multer({ storage : storage }).array('galleryPhotos'), fun
           return handleError(err);
         }
         else {
-          req.flash('info', create ? 'Gallery Creation Successful' : 'Gallery Update Successful');
+          req.flash('success', create ? 'Gallery Creation Successful' : 'Gallery Update Successful');
           res.redirect('/galleries');
         }
       });
@@ -93,6 +93,11 @@ router.post('/images', multer({ storage : storage }).array('galleryPhotos'), fun
   	}
   	else {
       Gallery.findById(req.body.galleryid, function (err, gallery) {
+        if (err) {
+          req.flash('error', 'Unable to find gallery to update.');
+          res.redirect('/images');
+          return;
+        }
         for (var i in images) {
           gallery.images.push(images[i])
           console.log(images[i]);

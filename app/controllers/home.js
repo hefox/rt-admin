@@ -16,7 +16,6 @@ router.get('/', function (req, res, next) {
   Gallery.find(function (err, galleries) {
     if (err) return next(err);
     res.render('index', {
-      user : req.user,
       title: 'Photo Uploader yay',
       galleries: galleries
     });

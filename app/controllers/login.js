@@ -9,7 +9,7 @@ module.exports = function (app) {
 };
 
 router.get('/login', function (req, res, next) {
-  res.render('login',  { user : req.user, error: req.flash('error') });
+  res.render('login', {title: 'Login'});
 });
 
 router.post('/login', passport.authenticate('local', {
