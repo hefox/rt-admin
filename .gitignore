@@ -3,3 +3,4 @@ public/components
 public/uploads
 .nyc_output
 .sass-cache
+config/config.js
