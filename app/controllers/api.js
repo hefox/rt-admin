@@ -40,3 +40,27 @@ router.get('/api/galleries', function (req, res, next) {
   });
 });
 
+/**
+ * View all galleries.
+ */
+router.get('/galleries/:gallerId', function (req, res, next) {
+  Gallery.findById(req.params.gallerId, function (err, gallery) {
+    if (err || !gallery) {
+      req.flash('error', 'Gallery not found.');
+      return next(err);
+    }
+    var images = [];
+    function imgPath(path) {
+      return path ? path.substr(path.indexOf('/')) : '';
+    }
+
+    // @todo how to propery traverse this array.
+    for (var i = 0; i < gallery.images.length; i++) {
+      if (gallery.images.hasOwnProperty(i)) {
+        images.push({src: imgPath(gallery.images[i].src)})
+      }
+    }
+    gallery.images = images;
+    res.json(gallery);
+  });
+})
