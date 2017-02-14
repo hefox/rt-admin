@@ -15,19 +15,6 @@ var path = require('path');
 var Gallery = mongoose.model('Gallery');
 var mkdirp = require('mkdirp');
 
-var handleError = function(err) {
-  router.redirect('/galleries/create');
-}
-
-module.exports = function (app) {
-  app.use('/', router);
-};
-
-var express = require('express'),
-  router = express.Router(),
-  mongoose = require('mongoose'),
-  Gallery = mongoose.model('Gallery');
-
 module.exports = function (app) {
   app.use('/', router);
 };
@@ -99,7 +86,11 @@ var storage = multer.diskStorage({
     // Use current stub if gallery id provided.
     else if (galleryId) {
       Gallery.findById(galleryId, function (err, gallery) {
-        if (err) return handleError(err);
+        if (err) {
+          req.flash('error', 'Unable to find gallery to add photos to.');
+          router.redirect('/galleries/create');
+          return;
+        }
         var dir = './public/uploads/' + gallery.stub + '/';
         callback(null, dir);
       });

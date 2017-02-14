@@ -36,10 +36,10 @@ module.exports = function(app, config) {
   app.use(bodyParser.urlencoded({
     extended: true
   }));
-  app.use(cookieParser('keyboard cat'));
+  app.use(cookieParser(config.secret ));
   app.use(require('express-session')({
     // @ todo set this in a secret outside of git
-      secret: 'keyboard cat',
+      secret: config.root,
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: 60000 }
