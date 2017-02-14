@@ -38,8 +38,7 @@ module.exports = function(app, config) {
   }));
   app.use(cookieParser(config.secret ));
   app.use(require('express-session')({
-    // @ todo set this in a secret outside of git
-      secret: config.root,
+      secret: config.secret,
       resave: false,
       saveUninitialized: false,
       cookie: { maxAge: 60000 }

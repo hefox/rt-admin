@@ -27,7 +27,7 @@ router.get('/api/galleries', function (req, res, next) {
     query.where('date').gt(new Date(ret.year, 1, 1)).lt(new Date(ret.year+1, 1, 1));
   }
   else {
-    query.limit(25);
+    query.limit(10);
     if (req.query.skip) {
       query.skip(parseInt(req.query.skip));
     }
@@ -35,7 +35,15 @@ router.get('/api/galleries', function (req, res, next) {
   // Return the galleries.
   query.exec(function (err, galleries) {
     if (err) return next(err);
-    ret.galleries = galleries
+    ret.galleries = [];
+    for (var g = 0; g < galleries.length; g++) {
+      ret.galleries.push({
+        name: galleries[g].name,
+        id: galleries[g]._id,
+        stub: galleries[g].stub,
+        firstImage: galleries[g].firstImage,
+      });
+    }
     res.json(ret);
   });
 });
@@ -43,24 +51,12 @@ router.get('/api/galleries', function (req, res, next) {
 /**
  * View all galleries.
  */
-router.get('/galleries/:gallerId', function (req, res, next) {
+router.get('/api/galleries/:gallerId', function (req, res, next) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err || !gallery) {
       req.flash('error', 'Gallery not found.');
       return next(err);
     }
-    var images = [];
-    function imgPath(path) {
-      return path ? path.substr(path.indexOf('/')) : '';
-    }
-
-    // @todo how to propery traverse this array.
-    for (var i = 0; i < gallery.images.length; i++) {
-      if (gallery.images.hasOwnProperty(i)) {
-        images.push({src: imgPath(gallery.images[i].src)})
-      }
-    }
-    gallery.images = images;
     res.json(gallery);
   });
 })

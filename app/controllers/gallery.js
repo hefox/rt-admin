@@ -159,17 +159,10 @@ router.get('/galleries/:gallerId', redirectIfNotLoggedIn, function (req, res, ne
       req.flash('error', 'Gallery not found.');
       return next(err);
     }
-    var images = [];
-    // @todo how to propery traverse this array.
-    for (var i = 0; i < gallery.images.length; i++) {
-      if (gallery.images.hasOwnProperty(i)) {
-        images.push({src: imgPath(gallery.images[i].src), _id: gallery.images[i]._id})
-      }
-    }
     res.render('galleries/gallery', {
       title: gallery.title,
       gallery: gallery,
-      images: images,
+      images: gallery.pathedImages,
     });
   });
 })
