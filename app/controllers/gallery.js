@@ -50,7 +50,7 @@ var redirectIfNotLoggedIn = function (req, res, next) {
 router.get('/galleries', redirectIfNotLoggedIn, function (req, res, next) {
   Gallery.find(function (err, galleries) {
     if (err) return next(err);
-    res.render('galleries', {
+    res.render('galleries/galleries', {
       title: 'Galleries',
       galleries: galleries,
     });
@@ -72,7 +72,7 @@ function imgPath(path) {
  * Create Gallery form
  */
 router.get('/galleries/create', redirectIfNotLoggedIn, function (req, res, next) {
-  res.render('gallerycreate',  {
+  res.render('galleries/gallerycreate',  {
     title: 'Create Gallery',
   });
 });
@@ -175,7 +175,7 @@ router.get('/galleries/:gallerId', redirectIfNotLoggedIn, function (req, res, ne
         images.push({src: imgPath(gallery.images[i].src), _id: gallery.images[i]._id})
       }
     }
-    res.render('gallery', {
+    res.render('galleries/gallery', {
       title: gallery.title,
       gallery: gallery,
       images: images,
@@ -193,7 +193,7 @@ router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, function (req, re
       return next(err);
     }
     var date = gallery.date.toISOString();
-    res.render('galleryedit', {
+    res.render('galleries/galleryedit', {
       title: 'Edit ' + (gallery.title ? gallery.title : 'Unnamed'),
       gallery: gallery,
       // todo Deal with timezones.
@@ -247,7 +247,7 @@ router.get('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, 
       req.flash('error', 'Unable to find image');
       return next(err);
     }
-    res.render('galleryimagedelete', {
+    res.render('galleries/galleryimagedelete', {
       title: 'Are you sure you want to delete image of gallery' + (gallery.title ? ' ' + gallery.title : '' ) + '? ',
       image: image,
       gallery: gallery,
