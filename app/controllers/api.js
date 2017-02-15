@@ -27,6 +27,7 @@ router.get('/api/galleries', function (req, res, next) {
     query.where('date').gt(new Date(ret.year, 1, 1)).lt(new Date(ret.year+1, 1, 1));
   }
   else {
+    // @todo skip is not performant for large data.
     query.limit(10);
     if (req.query.skip) {
       query.skip(parseInt(req.query.skip));

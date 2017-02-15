@@ -20,8 +20,8 @@ seeder.connect('mongodb://localhost/sample-dev', function() {
   passport.session();
   // Load Mongoose models
   seeder.loadModels([
-    './app/models/gallery.js',
-    './app/models/user.js',
+    './../app/models/gallery.js',
+    './../app/models/user.js',
   ]);
 
   // Clear specified collections

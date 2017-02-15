@@ -1,4 +1,13 @@
+<form action="/galleries" class="form-inline">
+  <div class="form-group">
+    <label for="searchString">Search</label>
+    <input type="text" class="form-control" id="searchString" placeholder="Search Titles" name="search">
+  </div>
+  <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
 {{#if galleries }}
+
   <table class="table table-hover">
     <thead>
       <tr>
@@ -31,6 +40,9 @@
       {{/each}}
     </tbody>
   </table>
+  {{#if showNext }}
+    <a href="/galleries?after={{after}}&search={{search}}" class="btn btn-default" >Next</a>
+  {{/if }}
 {{else}}
   No galleries yet.
 {{/if}}

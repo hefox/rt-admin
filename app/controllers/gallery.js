@@ -70,11 +70,30 @@ router.get('/thumbnails/:p1/:p2', thumbnailerizer);
  * View all galleries.
  */
 router.get('/galleries', redirectIfNotLoggedIn, function (req, res, next) {
-  Gallery.find(function (err, galleries) {
+  var limit = 50;
+  var find = {};
+  if (req.query.after > 0) {
+    find.date = {$lt: req.query.after};
+  }
+  var search = '';
+  if (req.query.search && req.query.search.length) {
+    search = req.query.search;
+    // @todo Security? Though only trusted users use this functionality
+    // may want to remove some characters. "i" flag is not performant.
+    find.title = { $regex: new RegExp(req.query.search, "i") };
+  }
+  Gallery
+    .find(find)
+    .limit(limit)
+     .sort({ date: -1}).exec(function (err, galleries) {
     if (err) return next(err);
     res.render('galleries/galleries', {
       title: 'Galleries',
       galleries: galleries,
+      after: galleries.length > 0 ?  galleries[galleries.length -1].date.valueOf() : 0,
+      current:  req.query.after ? req.query.after : 0,
+      showNext: galleries.length == limit,
+      search: search,
     });
   });
 });

@@ -5,7 +5,7 @@ var mongoose = require('mongoose'),
 
 var ImageSchema = new Schema({
   src: String,
-  thumbnail: String
+  thumb: String
 });
 
 ImageSchema.virtual('displaySrc').get(function () {
@@ -49,6 +49,7 @@ GallerySchema.virtual('pathedImages').get(function () {
     return [];
   }
   var images = [];
+  console.log(this.images);
   for (var i = 0; i < this.images.length; i++) {
     var local =
     images.push(
