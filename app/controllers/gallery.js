@@ -14,6 +14,7 @@ var multer  =   require('multer');
 var path = require('path');
 var Gallery = mongoose.model('Gallery');
 var mkdirp = require('mkdirp');
+var sharp = require('sharp');
 
 module.exports = function (app) {
   app.use('/', router);
@@ -30,6 +31,39 @@ var redirectIfNotLoggedIn = function (req, res, next) {
     next()
   }
 }
+
+/**
+ * Resize the image to a thumbnail and store it under thumbnails.
+ */
+var thumbnailerizer = function (req, res, next) {
+  var path = req.params.p1 + (req.params.p2 ? '/' + req.params.p2 : '');
+  var dir = req.params.p2 ?  req.params.p1 : '' ;
+  var s = sharp('./public/uploads/' + path);
+  var resize = function() {
+    return s.resize(100)
+     .toFile('./public/thumbnails/'+ path, (err, info) => {
+        if (err) {
+          next(err);
+        }
+        // Redirect to grab new image.
+        // @todo likely can make this more effeiciant via grabbing buffer
+        res.redirect('/thumbnails/' + path);
+    });
+  }
+  if (dir) {
+    mkdirp('./public/thumbnails/'+ dir, err => {
+      if (err) {
+        return next(err)
+      }
+      return resize();
+    });
+  }
+  else {
+    return resize();
+  }
+}
+router.get('/thumbnails/:p1', thumbnailerizer);
+router.get('/thumbnails/:p1/:p2', thumbnailerizer);
 
 /**
  * View all galleries.

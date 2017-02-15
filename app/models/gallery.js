@@ -14,7 +14,7 @@ ImageSchema.virtual('displaySrc').get(function () {
   }
   var src = this.src
   if (src.indexOf('public/') === 0) {
-    src = src.substr(path.indexOf('/'));
+    src = src.substr(src.indexOf('/'));
   }
   return src;
 });
