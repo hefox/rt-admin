@@ -62,6 +62,7 @@ var thumbnailerizer = function (req, res, next) {
     return resize();
   }
 }
+// @todo Should be a way to specificy p2 as optional and have 1 root, ? didn't work.
 router.get('/thumbnails/:p1', thumbnailerizer);
 router.get('/thumbnails/:p1/:p2', thumbnailerizer);
 

@@ -41,7 +41,10 @@ seeder.connect('mongodb://localhost/sample-dev', function() {
         var images = [];
         var allimages = require('./albums/' + albums[key]['stub'] + '.json');
         for (var i in allimages.images) {
-          images.push({src: 'http://richtrove.com/' + albums[key]['href'] + '/' +  allimages.images[i].replace('thumbnails/', 'images/')});
+          images.push({
+            src: 'http://richtrove.com/' + albums[key]['href'] + '/' +  allimages.images[i].replace('thumbnails/', 'images/'),
+            thumb: 'http://richtrove.com/' + albums[key]['href'] + '/' +  allimages.images[i],
+          });
         }
         data[0].documents.push({
           date: albums[key]['date'] ? new Date(albums[key]['date']) : null,

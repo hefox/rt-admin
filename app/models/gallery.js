@@ -19,6 +19,22 @@ ImageSchema.virtual('displaySrc').get(function () {
   return src;
 });
 
+ImageSchema.virtual('displayThumbnail').get(function () {
+  if (!this.src) {
+    return '';
+  }
+  if (this.thumb) {
+    return this.thumb;
+  }
+  var src = this.src;
+  // Local image, we can use the thumbnailizer.
+  if (src.indexOf('public/') === 0) {
+    src = src.substr(src.indexOf('/', src.indexOf('/') +1 ));
+    return '/thumbnails'+ src;
+  }
+  return '';
+});
+
 var GallerySchema = new Schema({
   title: String,
   date: { type: Date, default: Date.now },
@@ -34,7 +50,13 @@ GallerySchema.virtual('pathedImages').get(function () {
   }
   var images = [];
   for (var i = 0; i < this.images.length; i++) {
-    images.push({src: this.images[i].displaySrc, _id: this.images[i]._id})
+    var local =
+    images.push(
+      {
+        src: this.images[i].displaySrc,
+        thumbnail: this.images[i].displayThumbnail,
+        _id: this.images[i]._id
+      })
   }
   return images;
 });

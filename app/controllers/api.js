@@ -57,6 +57,13 @@ router.get('/api/galleries/:gallerId', function (req, res, next) {
       req.flash('error', 'Gallery not found.');
       return next(err);
     }
-    res.json(gallery);
+    console.log('wat',  gallery.pathedImages);
+    gallery.images2 = gallery.pathedImages;
+    res.json({
+      title: gallery.title,
+      id: gallery._id,
+      stub: gallery.stub,
+      images: gallery.pathedImages,
+    });
   });
 })
