@@ -7,8 +7,8 @@ var passport = require('passport'),
   LocalStrategy = require('passport-local').Strategy;
 
 // Connect to MongoDB via Mongoose
-seeder.connect('mongodb://localhost/sample-dev', function() {
-  cookieParser(config.secret )
+seeder.connect('mongodb://localhost/rtadmin-test', function() {
+  cookieParser(config.secret)
   require('express-session')({
     // @ todo set this in a secret outside of git
       secret: config.secret,
@@ -25,7 +25,7 @@ seeder.connect('mongodb://localhost/sample-dev', function() {
   ]);
 
   // Clear specified collections
-  seeder.clearModels(['Gallery', 'User'], function() {
+  seeder.clearModels([], function() { //['Gallery', 'User']
     var User = mongoose.model('User');
     var newUser = new User({username: 'test2'});
     User.register(newUser, 'test2', function() {});
@@ -35,9 +35,9 @@ seeder.connect('mongodb://localhost/sample-dev', function() {
     }];
     var count = 0;
     for (var key in albums) {
+      if (count <= 1500) continue;
       if (!albums.external && albums[key]['stub'].indexOf('http:') == -1) {
         count++;
-        if (count > 100) break;
         var images = [];
         var allimages = require('./albums/' + albums[key]['stub'] + '.json');
         for (var i in allimages.images) {

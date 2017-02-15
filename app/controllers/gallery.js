@@ -272,7 +272,46 @@ router.post('/galleries/:gallerId/edit', redirectIfNotLoggedIn, multerHandler, f
 });
 
 /**
+ * Handling gallery editing.
+ */
+router.get('/galleries/:gallerId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+  Gallery.findById(req.params.gallerId, function (err, gallery) {
+    if (err) {
+      req.flash('error', 'Gallery not found.');
+      return next(err);
+    }
+    var date = gallery.date.toISOString();
+    res.render('galleries/gallerydelete', {
+      title: 'Are you sure you want to delete ' + (gallery.title ? gallery.title : 'Unnamed') + ' gallery?',
+      gallery: gallery,
+      // todo Deal with timezones.
+      date: date.substring(0, date.indexOf('T'))
+    });
+  });
+});
+
+/**
+ * Handling image deletion.
+ *
+ * @todo Delete images files from galleries.
+ */
+router.post('/galleries/:gallerId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+  Gallery.remove({'_id': req.params.gallerId}, function (err, gallery) {
+    if (err) {
+      req.flash('error', 'Error deleting gallery.');
+      return next(err);
+    }
+    req.flash('succes', 'Deleted gallery.');
+    res.redirect('/galleries');
+  });
+});
+
+
+
+/**
  * Handling showing image deletion form.
+ *
+ * @todo Delete image file.
  */
 router.get('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, function (req, res, err) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {

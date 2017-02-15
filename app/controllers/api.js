@@ -42,6 +42,7 @@ router.get('/api/galleries', function (req, res, next) {
         name: galleries[g].name,
         id: galleries[g]._id,
         stub: galleries[g].stub,
+        date: galleries[g].date.toString(),
         firstImage: galleries[g].firstImage,
       });
     }
@@ -58,12 +59,12 @@ router.get('/api/galleries/:gallerId', function (req, res, next) {
       req.flash('error', 'Gallery not found.');
       return next(err);
     }
-    console.log('wat',  gallery.pathedImages);
     gallery.images2 = gallery.pathedImages;
     res.json({
       title: gallery.title,
       id: gallery._id,
       stub: gallery.stub,
+      date: gallery.date.toString(),
       images: gallery.pathedImages,
     });
   });
