@@ -36,12 +36,30 @@ ImageSchema.virtual('displayThumbnail').get(function () {
 });
 
 var GallerySchema = new Schema({
-  title: String,
-  date: { type: Date, default: Date.now },
+  title: {
+    type: String,
+    required: true
+  },
+  date: {
+    type: Date,
+    default: Date.now
+  },
   external: Boolean,
   href: String,
-  stub: String,
+  stub: {
+    type: String,
+    required: true,
+    unique : true,
+  },
   images: [ImageSchema]
+});
+
+GallerySchema.pre('save', function(next) {
+  // do stuff
+  if (!this.stub) {
+    this.stub = this.title.replace(/[^a-zA-Z\d- ]/, '');
+  }
+  next();
 });
 
 GallerySchema.virtual('pathedImages').get(function () {
@@ -49,7 +67,6 @@ GallerySchema.virtual('pathedImages').get(function () {
     return [];
   }
   var images = [];
-  console.log(this.images);
   for (var i = 0; i < this.images.length; i++) {
     var local =
     images.push(
