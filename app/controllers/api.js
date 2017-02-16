@@ -14,10 +14,16 @@ module.exports = function (app) {
   app.use('/', router);
 };
 
+var allowCors = function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+};
+
 /**
  * View all galleries.
  */
-router.get('/api/galleries', function (req, res, next) {
+router.get('/api/galleries', allowCors, function (req, res, next) {
   var ret = {};
   var query = Gallery.find({$or: [{'images.src': {$exists:true}}, {external: true}] })
     .sort({ date: -1, title: 1 });
@@ -27,8 +33,9 @@ router.get('/api/galleries', function (req, res, next) {
     query.where('date').gt(new Date(ret.year, 1, 1)).lt(new Date(ret.year+1, 1, 1));
   }
   else {
-    // @todo skip is not performant for large data.
-    query.limit(10);
+    /* @todo Need to figure out how this would work
+      with the search being on the client */
+    query.limit(400);
     if (req.query.skip) {
       query.skip(parseInt(req.query.skip));
     }
@@ -39,7 +46,7 @@ router.get('/api/galleries', function (req, res, next) {
     ret.galleries = [];
     for (var g = 0; g < galleries.length; g++) {
       ret.galleries.push({
-        name: galleries[g].name,
+        title: galleries[g].title,
         id: galleries[g]._id,
         stub: galleries[g].stub,
         date: galleries[g].date.toString(),
@@ -50,22 +57,36 @@ router.get('/api/galleries', function (req, res, next) {
   });
 });
 
+// Handle gallery return
+function returnGallery(err, gallery, req, res, next) {
+  if (err || !gallery) {
+    req.flash('error', 'Gallery not found.');
+    return next(err);
+  }
+  gallery.images2 = gallery.pathedImages;
+  res.json({
+    title: gallery.title,
+    id: gallery._id,
+    stub: gallery.stub,
+    date: gallery.date.toString(),
+    images: gallery.pathedImages,
+  });
+}
 /**
  * View all galleries.
  */
-router.get('/api/galleries/:gallerId', function (req, res, next) {
+router.get('/api/galleries/:gallerId', allowCors, function (req, res, next) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
-    if (err || !gallery) {
-      req.flash('error', 'Gallery not found.');
-      return next(err);
-    }
-    gallery.images2 = gallery.pathedImages;
-    res.json({
-      title: gallery.title,
-      id: gallery._id,
-      stub: gallery.stub,
-      date: gallery.date.toString(),
-      images: gallery.pathedImages,
-    });
+    return returnGallery(gallery, err, req, res, next);
   });
 })
+
+/**
+ * View all galleries.
+ */
+router.get('/api/galleries/stub/:stub', allowCors, function (req, res, next) {
+  Gallery.find({'stub': req.params.stub}, function (err, gallery) {
+    return returnGallery(err, gallery.length ? gallery[0] : null, req, res, next);
+  });
+})
+

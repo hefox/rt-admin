@@ -25,7 +25,7 @@ seeder.connect('mongodb://localhost/rtadmin-test', function() {
   ]);
 
   // Clear specified collections
-  seeder.clearModels([], function() { //['Gallery', 'User']
+  seeder.clearModels(['User'], function() { //['Gallery', 'User']
     var User = mongoose.model('User');
     var newUser = new User({username: 'test2'});
     User.register(newUser, 'test2', function() {});
@@ -35,9 +35,10 @@ seeder.connect('mongodb://localhost/rtadmin-test', function() {
     }];
     var count = 0;
     for (var key in albums) {
-      if (count <= 1500) continue;
       if (!albums.external && albums[key]['stub'].indexOf('http:') == -1) {
         count++;
+        if (count <= 2000) continue;
+        if (count > 3000) break;
         var images = [];
         var allimages = require('./albums/' + albums[key]['stub'] + '.json');
         for (var i in allimages.images) {
