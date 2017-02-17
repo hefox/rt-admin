@@ -15,7 +15,7 @@ var path = require('path');
 var Gallery = mongoose.model('Gallery');
 var mkdirp = require('mkdirp');
 var sharp = require('sharp');
-var csurf = require('csurf');
+var csrf = require('csurf');
 
 module.exports = function (app) {
   app.use('/', router);
@@ -33,7 +33,7 @@ var redirectIfNotLoggedIn = function (req, res, next) {
   }
 }
 // Add cookie CSRF protection
-var csrfProtection = csrf({ cookie: true });
+var csrfProtection = csrf({ cookie: true, value: function(req) { return req.body && req.body._csrf ? req.body._csrf : null}});
 
 /**
  * Resize the image to a thumbnail and store it under thumbnails.
@@ -179,7 +179,7 @@ var multerHandler = multer({ storage : storage }).array('galleryPhotos');
 /**
  * Handling gallery creation.
  */
-router.post('/galleries/create', redirectIfNotLoggedIn, csrfProtection, multerHandler, function(req, res, next){
+router.post('/galleries/create', redirectIfNotLoggedIn, multerHandler, csrfProtection, function(req, res, next){
   if (!req.user) {
 	  req.flash('info', 'Please Login to access this area.');
     res.redirect('/login');
