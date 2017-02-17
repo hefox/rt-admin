@@ -33,7 +33,7 @@ var redirectIfNotLoggedIn = function (req, res, next) {
   }
 }
 // Add cookie CSRF protection
-var csrfProtection = csrf({ cookie: true, value: function(req) { return req.body && req.body._csrf ? req.body._csrf : null}});
+var csrfProtection = csrf({ cookie: true});
 
 /**
  * Resize the image to a thumbnail and store it under thumbnails.
@@ -228,7 +228,7 @@ router.get('/galleries/:gallerId', redirectIfNotLoggedIn, function (req, res, ne
 /**
  * Handling gallery editing.
  */
-router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, function (req, res, err) {
+router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, csrfProtection, function (req, res, err) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err) {
       req.flash('error', 'Gallery not found.');
@@ -238,6 +238,7 @@ router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, function (req, re
     res.render('galleries/galleryedit', {
       title: 'Edit ' + (gallery.title ? gallery.title : 'Unnamed'),
       gallery: gallery,
+      csrfToken: req.csrfToken(),
       // todo Deal with timezones.
       date: date.substring(0, date.indexOf('T'))
     });
@@ -247,7 +248,7 @@ router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, function (req, re
 /**
  * Handling gallery edit submission.
  */
-router.post('/galleries/:gallerId/edit', redirectIfNotLoggedIn, multerHandler, function (req, res, next) {
+router.post('/galleries/:gallerId/edit', redirectIfNotLoggedIn, multerHandler, csrfProtection, function (req, res, next) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err) {
       req.flash('error', 'Gallery not found.');
@@ -278,7 +279,7 @@ router.post('/galleries/:gallerId/edit', redirectIfNotLoggedIn, multerHandler, f
 /**
  * Handling gallery editing.
  */
-router.get('/galleries/:gallerId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+router.get('/galleries/:gallerId/delete', redirectIfNotLoggedIn, csrfProtection, function (req, res, err) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err) {
       req.flash('error', 'Gallery not found.');
@@ -288,6 +289,7 @@ router.get('/galleries/:gallerId/delete', redirectIfNotLoggedIn, function (req, 
     res.render('galleries/gallerydelete', {
       title: 'Are you sure you want to delete ' + (gallery.title ? gallery.title : 'Unnamed') + ' gallery?',
       gallery: gallery,
+      csrfToken: req.csrfToken(),
       // todo Deal with timezones.
       date: date.substring(0, date.indexOf('T'))
     });
@@ -299,7 +301,7 @@ router.get('/galleries/:gallerId/delete', redirectIfNotLoggedIn, function (req, 
  *
  * @todo Delete images files from galleries.
  */
-router.post('/galleries/:gallerId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+router.post('/galleries/:gallerId/delete', redirectIfNotLoggedIn, csrfProtection, function (req, res, err) {
   Gallery.remove({'_id': req.params.gallerId}, function (err, gallery) {
     if (err) {
       req.flash('error', 'Error deleting gallery.');
@@ -317,7 +319,7 @@ router.post('/galleries/:gallerId/delete', redirectIfNotLoggedIn, function (req,
  *
  * @todo Delete image file.
  */
-router.get('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+router.get('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, csrfProtection, function (req, res, err) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err) {
       req.flash('error', 'Gallery not found.');
@@ -331,6 +333,7 @@ router.get('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, 
     res.render('galleries/galleryimagedelete', {
       title: 'Are you sure you want to delete image of gallery' + (gallery.title ? ' ' + gallery.title : '' ) + '? ',
       image: image,
+      csrfToken: req.csrfToken(),
       gallery: gallery,
       src: imgPath(image.src),
     });
@@ -341,7 +344,7 @@ router.get('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, 
 /**
  * Handling image deletion.
  */
-router.post('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, function (req, res, err) {
+router.post('/galleries/:gallerId/image/:imageId/delete', redirectIfNotLoggedIn, csrfProtection, function (req, res, err) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
     if (err) {
       req.flash('error', 'Gallery not found.');
