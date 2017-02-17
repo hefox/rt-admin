@@ -15,6 +15,7 @@ var path = require('path');
 var Gallery = mongoose.model('Gallery');
 var mkdirp = require('mkdirp');
 var sharp = require('sharp');
+var csurf = require('csurf');
 
 module.exports = function (app) {
   app.use('/', router);
@@ -31,6 +32,8 @@ var redirectIfNotLoggedIn = function (req, res, next) {
     next()
   }
 }
+// Add cookie CSRF protection
+var csrfProtection = csrf({ cookie: true });
 
 /**
  * Resize the image to a thumbnail and store it under thumbnails.
@@ -112,9 +115,10 @@ function imgPath(path) {
 /**
  * Create Gallery form
  */
-router.get('/galleries/create', redirectIfNotLoggedIn, function (req, res, next) {
+router.get('/galleries/create', redirectIfNotLoggedIn, csrfProtection, function (req, res, next) {
   res.render('galleries/gallerycreate',  {
     title: 'Create Gallery',
+    csrfToken: req.csrfToken(),
   });
 });
 
@@ -175,7 +179,7 @@ var multerHandler = multer({ storage : storage }).array('galleryPhotos');
 /**
  * Handling gallery creation.
  */
-router.post('/galleries/create', redirectIfNotLoggedIn, multerHandler, function(req, res, next){
+router.post('/galleries/create', redirectIfNotLoggedIn, csrfProtection, multerHandler, function(req, res, next){
   if (!req.user) {
 	  req.flash('info', 'Please Login to access this area.');
     res.redirect('/login');
