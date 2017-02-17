@@ -3,6 +3,7 @@
     action="/galleries/create"
     method="post"
     class="form-horizontal">
+  <input type="hidden" name="_csrf" value="{{csrfToken}}">
   <div class="form-group">
     <label for="gallery" class="col-sm-2 control-label">Gallery Name</label>
     <div class="col-sm-10">
