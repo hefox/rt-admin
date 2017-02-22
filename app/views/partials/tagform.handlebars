@@ -1,0 +1,17 @@
+<div class="form-group">
+  <label for="tag-free" class="col-sm-2 control-label">Tags</label>
+  <div class="col-sm-10">
+    {{#if tags}}
+      {{#each tags as |tag key|}}
+        <div class="checkbox-inline">
+          <label>
+            <input type="checkbox" value="{{tag}}" name="galleryTags[]" {{{isChecked tag ../gallery.tags}}}" >
+            {{tag}}
+          </label>
+        </div>
+      {{/each}}
+    {{/if}}
+    <input id="tag-free" type="text" name="galleryTagsFree" placeholder='Tags' class="form-control" />
+    <div class="help">Separate multiple tags with commas.</div>
+  </div>
+</div>

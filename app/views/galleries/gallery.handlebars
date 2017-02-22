@@ -1,5 +1,18 @@
 <p class="lead">{{formatDate gallery.date day="numeric" month="long" year="numeric"}}
-  <a href="/galleries/{{gallery._id}}/edit" class="btn btn-primary">Edit</a></p>
+  <a href="/galleries/{{gallery._id}}/edit" class="btn btn-primary">Edit</a>
+  -
+  <a href="/galleries/{{gallery._id}}/delete" class="btn">Delete</a>
+</p>
+{{#if gallery.tags }}
+  <p><strong>Tags:</strong>
+  {{#each gallery.tags as |tag key|}}{{#if @index}}, {{/if}}{{tag}}{{/each}}
+  </p>
+{{/if}}
+{{#if gallery.venues }}
+  <p><strong>Venues:</strong>
+  {{#each gallery.venues as |venue key|}}{{#if @index}}, {{/if}}{{venue}}{{/each}}
+  </p>
+{{/if}}
 {{#if images }}
   <table class="table table-hover">
     <thead>
@@ -13,7 +26,7 @@
         <tr>
           <td>
             <a href="{{image.src}}">
-              <img src={{image.thumbnail}} style="width:100px;" />
+              <img src="{{image.thumbnail}}" style="width:100px;" />
             </a>
           </td>
           <td>

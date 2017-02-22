@@ -51,6 +51,8 @@ var GallerySchema = new Schema({
     required: true,
     unique : true,
   },
+  tags: [String],
+  venues: [String],
   images: [ImageSchema]
 });
 

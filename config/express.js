@@ -28,6 +28,9 @@ module.exports = function(app, config) {
   }));
   app.set('views', config.root + '/app/views');
   HandlebarsIntl.registerWith(Handlebars);
+  Handlebars.registerHelper('isChecked', function(val, arr) {
+    return arr.indexOf(val) > -1 ? 'checked=checked' : '';
+  });
   app.set('view engine', 'handlebars');
 
   // app.use(favicon(config.root + '/public/img/favicon.ico'));

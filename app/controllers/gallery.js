@@ -34,7 +34,20 @@ var redirectIfNotLoggedIn = function (req, res, next) {
 }
 // Add cookie CSRF protection
 var csrfProtection = csrf({ cookie: true});
-
+// Load categories
+var loadTags = function (req, res, next) {
+  Gallery.find().distinct('tags', function(error, tags) {
+    req.galleryTags = tags;
+    next();
+  });
+}
+// Load Venues
+var loadVenues = function (req, res, next) {
+  Gallery.find().distinct('venues', function(error, tags) {
+    req.galleryVenues = tags;
+    next();
+  });
+}
 /**
  * Resize the image to a thumbnail and store it under thumbnails.
  */
@@ -115,10 +128,13 @@ function imgPath(path) {
 /**
  * Create Gallery form
  */
-router.get('/galleries/create', redirectIfNotLoggedIn, csrfProtection, function (req, res, next) {
-  res.render('galleries/gallerycreate',  {
+router.get('/galleries/create', redirectIfNotLoggedIn, csrfProtection, loadTags, loadVenues, function (req, res, next) {
+  res.render('galleries/create',  {
     title: 'Create Gallery',
     csrfToken: req.csrfToken(),
+    venues: req.galleryVenues,
+    tags: req.galleryTags,
+    gallery: {tags: [], venues: []}
   });
 });
 
@@ -136,7 +152,6 @@ var storage = multer.diskStorage({
   destination: function (req, file, callback) {
     // If using galleryname, return the new uploads.
     var galleryId = req.params.gallerId ? req.params.gallerId : req.body.galleryid;
-    console.log('got to upload', galleryId);
     if (req.body.galleryname) {
       var dir = './public/uploads/' + createStub(req.body.galleryname) + '/';
       mkdirp(dir, err => callback(err, dir));
@@ -162,6 +177,8 @@ var storage = multer.diskStorage({
 
 // Wrapper for gallery save.
 var gallerySave = function(gallery, req, res, next, create) {
+  processGalleryTags(gallery, 'tags', 'Tags', req);
+  processGalleryTags(gallery, 'venues', 'Venues', req);
   gallery.save(function (err) {
     if (err) {
       req.flash('error', create ? 'Gallery Creation Failed' : 'Gallery Update Failed');
@@ -175,6 +192,20 @@ var gallerySave = function(gallery, req, res, next, create) {
 }
 
 var multerHandler = multer({ storage : storage }).array('galleryPhotos');
+
+function processGalleryTags(gallery, key, keyUpper, req) {
+  gallery[key] = [];
+	if (req.body['gallery' + keyUpper +  'Free']) {
+  	gallery[key] = gallery[key].concat(req.body['gallery' + keyUpper +  'Free'].split(','));
+	}
+	if (req.body['gallery' + keyUpper]) {
+  	gallery[key] = gallery[key].concat(req.body['gallery' + keyUpper]);
+	}
+	// Make distinct
+	gallery[key] = Array.from(new Set(gallery[key]));
+	// Trim off any trailing whitespace.
+	gallery[key] = gallery[key].map(function(s) { return s.trim()});
+}
 
 /**
  * Handling gallery creation.
@@ -225,20 +256,24 @@ router.get('/galleries/:gallerId', redirectIfNotLoggedIn, function (req, res, ne
   });
 })
 
+
+
 /**
  * Handling gallery editing.
  */
-router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, csrfProtection, function (req, res, err) {
-  Gallery.findById(req.params.gallerId, function (err, gallery) {
+router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, csrfProtection, loadTags, loadVenues, function (req, res, err) {
+  Gallery.findById(req.params.gallerId).exec(function (err, gallery) {
     if (err) {
       req.flash('error', 'Gallery not found.');
       return next(err);
     }
     var date = gallery.date.toISOString();
-    res.render('galleries/galleryedit', {
+    res.render('galleries/edit', {
       title: 'Edit ' + (gallery.title ? gallery.title : 'Unnamed'),
       gallery: gallery,
       csrfToken: req.csrfToken(),
+      venues: req.galleryVenues,
+      tags: req.galleryTags,
       // todo Deal with timezones.
       date: date.substring(0, date.indexOf('T'))
     });
@@ -250,29 +285,23 @@ router.get('/galleries/:gallerId/edit', redirectIfNotLoggedIn, csrfProtection, f
  */
 router.post('/galleries/:gallerId/edit', redirectIfNotLoggedIn, multerHandler, csrfProtection, function (req, res, next) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
-    if (err) {
-      req.flash('error', 'Gallery not found.');
-      return next(err);
+    if (err || !gallery) {
+      req.flash('error', 'Unable to find gallery to update.');
+      res.redirect('/galleries');
+      return;
     }
-    Gallery.findById(req.params.gallerId, function (err, gallery) {
-      if (err || !gallery) {
-        req.flash('error', 'Unable to find gallery to update.');
-        res.redirect('/galleries');
-        return;
-      }
-    	for (var key in req.files) {
-      	if (req.files[key].mimetype.indexOf('image/') === 0) {
-        	gallery.images.push({src: req.files[key].path});
-      	}
-      	else {
-        	// @todo delete file?
-          req.flash('error', 'Image of improver format uploaded ' + req.files[key].mimetype);
-      	}
+  	for (var key in req.files) {
+    	if (req.files[key].mimetype.indexOf('image/') === 0) {
+      	gallery.images.push({src: req.files[key].path});
     	}
-    	gallery.title = req.body.galleryTitle;
-    	gallery.date = req.body.galleryDate;
-      gallerySave(gallery, req, res, next, false);
-    });
+    	else {
+      	// @todo delete file?
+        req.flash('error', 'Image of improver format uploaded ' + req.files[key].mimetype);
+    	}
+  	}
+  	gallery.title = req.body.galleryTitle;
+  	gallery.date = req.body.galleryDate;
+    gallerySave(gallery, req, res, next, false);
   });
 });
 
