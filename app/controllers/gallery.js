@@ -211,11 +211,6 @@ function processGalleryTags(gallery, key, keyUpper, req) {
  * Handling gallery creation.
  */
 router.post('/galleries/create', redirectIfNotLoggedIn, multerHandler, csrfProtection, function(req, res, next){
-  if (!req.user) {
-	  req.flash('info', 'Please Login to access this area.');
-    res.redirect('/login');
-    return;
-  }
 	if (req.body.galleryname && req.files.length > 0) {
   	var images = [];
   	for (var key in req.files) {

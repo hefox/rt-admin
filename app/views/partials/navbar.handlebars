@@ -15,6 +15,10 @@
         {{#if user}}
           <li><a href="/galleries/create">Upload Gallery</a></li>
           <li><a href="/galleries">Galleries</a></li>
+          {{#if user.admin}}
+            <li><a href="/users">Users</a></li>
+            <li><a href="/users/create">Add User</a></li>
+          {{/if}}
           <li><a href="/logout">Logout</a></li>
         {{else}}
           <li><a href="/login">login</a></li>
