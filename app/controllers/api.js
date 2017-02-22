@@ -72,8 +72,28 @@ function returnGallery(err, gallery, req, res, next) {
     images: gallery.pathedImages,
   });
 }
+
 /**
- * View all galleries.
+ * Get all tags.
+ */
+router.get('/api/galleries/venues', allowCors, function (req, res, next) {
+  Gallery.find().distinct('venues').exec(function(error, venues) {
+    console.log(venues);
+    res.json(venues);
+  });
+})
+
+/**
+ * Get all tags.
+ */
+router.get('/api/galleries/tags', allowCors, function (req, res, next) {
+  Gallery.find().distinct('tags').exec(function(error, tags) {
+    res.json(tags);
+  });
+})
+
+/**
+ * Get gallery by id.
  */
 router.get('/api/galleries/:gallerId', allowCors, function (req, res, next) {
   Gallery.findById(req.params.gallerId, function (err, gallery) {
@@ -82,11 +102,10 @@ router.get('/api/galleries/:gallerId', allowCors, function (req, res, next) {
 })
 
 /**
- * View all galleries.
+ * Get gallery by stub.
  */
 router.get('/api/galleries/stub/:stub', allowCors, function (req, res, next) {
   Gallery.find({'stub': req.params.stub}, function (err, gallery) {
     return returnGallery(err, gallery.length ? gallery[0] : null, req, res, next);
   });
 })
-
