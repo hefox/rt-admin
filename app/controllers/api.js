@@ -51,6 +51,8 @@ router.get('/api/galleries', allowCors, function (req, res, next) {
         stub: galleries[g].stub,
         date: galleries[g].date.toString(),
         firstImage: galleries[g].firstImage,
+        tags: galleries[g].tags || [],
+        venues: galleries[g].venues || [],
       });
     }
     res.json(ret);
@@ -70,6 +72,8 @@ function returnGallery(err, gallery, req, res, next) {
     stub: gallery.stub,
     date: gallery.date.toString(),
     images: gallery.pathedImages,
+    tags: gallery.tags || [],
+    venues: gallery.venues || [],
   });
 }
 
